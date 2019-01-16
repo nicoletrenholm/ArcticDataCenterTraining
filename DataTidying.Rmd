@@ -43,14 +43,89 @@ head(catch_long)
 
 ```
 
+Here we fix the misrepresentation of # of fish 
 
-
-# Split-Apply-Combine
 
 ```{r}
+ catch_cleaned <- catch_long %>% 
+  rename(catch_thousands = catch) %>% #%>% 
+  mutate(catch_thousands = ifelse(catch_thousands == "I", 1, catch_thousands)) %>%  # 1 means true 
+  mutate(catch_thousands = as.integer(catch_thousands)) %>% # this added to make sure catch_thousands is not a cht but and int
+ #mutate(catch = catch_thousands * 1000)
+  mutate(catch = catch_thousands * 1000)
+
+tail(catch_cleaned)
 ```
+if see this error: Error in mutate_impl(.data, dots) : Evaluation error: non-numeric argument to binary operator.
+
+then there is a letter in the catch value column ....yike
+so comment out some things above then do a test to find the issue
+
+```{r, eval = F, echo = F}
+#test_catch <- as.integer(catch_cleaned$catch_thousands)
+
+#i <- which(is.na(test_catch) == T) # to look for issue
+
+#catch_cleaned[i, ] #to find issue first item is rown and second in columns in bracket
+
+```
+
+```{r}
+catch_total <- catch_cleaned %>% 
+  group_by(Region, Year) %>% 
+  summarize(catch_region = sum(catch))
+
+catch_total
+```
+# try to do average catch a year of
+```{r}
+catch_matt <- catch_cleaned %>% 
+  group_by(species, Year) %>% 
+  summarize(catch_mean = mean(catch),
+            catch_sd = sd(catch),
+              catch_n = n()) # total observatinos
+          
+
+catch_matt
+```
+# Split-Apply-Combine
+
+Filter for Chinook 
+
+```{r}
+catch_chinook <- catch_cleaned %>% 
+  filter(species == "Chinook" & Region == "SSE" & Year > 1990) %>% 
+  arrange(-Year)
+#  -Year desecingin
+head(catch_chinook) 
+```
+
 
 #JOins
 
+
 ```{r}
+region_defs <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1", method = "libcurl"),
+                        stringsAsFactors = FALSE)
+head(region_defs) # this lets you look at the a sample of the data.
+```
+
+
+# clean out column I do not want
+```{r}
+region_clean <- region_defs %>% 
+  select(code, mgmtArea)
+
+head(region_clean)
+```
+  
+  #Join
+```{r}
+   catch_joined <- left_join(catch_cleaned, region_clean, 
+                             by = c("Region" = "code"))
+head(catch_joined)
+test <- c("Region", "code")
+
+                             
+                             
 ```
