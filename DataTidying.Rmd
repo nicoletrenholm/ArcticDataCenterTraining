@@ -26,8 +26,26 @@ catch_df <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df3
 head(catch_df)
 ```
 
+control shift m for %>% 
 
-# Aplit-Apply-Combine
+get ride of columns done wannt or select
+
+* Remove  marginal sum and notes column
+* move from wide to long format
+
+```{r}
+
+catch_long<- catch_df %>% 
+  select(-All, -notesRegCode) %>% # negative calues remote columns
+  gather(key = 'species', value = "catch", -Year, -Region)
+
+head(catch_long)
+
+```
+
+
+
+# Split-Apply-Combine
 
 ```{r}
 ```
