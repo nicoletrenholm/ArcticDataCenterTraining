@@ -3,6 +3,16 @@ title: "index"
 output: html_document
 ---
 
+# library(ggplot2)
+
+```{r}
+library(DT)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+ 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -26,3 +36,80 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+```{r}
+esc <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e", method = "libcurl"),
+                             stringsAsFactors = F)
+
+#head(esc)
+```
+
+Calculate annual, reginoal total escaement, 
+* 'seperate' the date into year - month - day
+* 'group by' 'summarize' to calculate the sum over unique region-year-species combinations
+* filter for salmon species
+
+```{r}
+ annual_esc <- esc %>%
+    separate(sampleDate, into = c("year", "month", "day"), sep = "-") %>% 
+    mutate(year = as.numeric(year)) %>% 
+    group_by(SASAP.Region, Species, year) %>% 
+    summarize(escapement = sum(DailyCount)) %>% 
+    filter(Species %in% c("Chinook", "Sockeye", "Pink", "Chum", "Coho"))
+head(annual_esc)
+     
+```
+
+```{r, echo = F}
+datatable(annual_esc)
+```
+#Static Plots
+```{r}
+ ggplot(annual_esc, aes(x = Species, y = escapement, fill = Species)) +
+  geom_col()
+```
+
+```{r}
+ ggplot(annual_esc, aes(x = Species, y = escapement, fill = SASAP.Region)) +
+  geom_col()
+```
+time series of Kodiak escapement by species
+color outside bar fill fill inside....
+```{r}
+kodiak_esc <- (annual.esc %>% 
+     filter(SASAP.Region == "Kodiak")
+```
+     # save theme as a variable
+```{r}
+ my_theme <- theme_bw() +
+  theme(plot.title =element_text(hjust = 0.5))
+```
+
+```{r}
+ ggplot(data = filter(annual_esc, SASAP.Region == "Kodiak"), 
+        aes(x = year, y = escapement, color = Species)) +
+  geom_line() +
+  geom_point() +
+  ylab("Escapement (number of fish)") +
+    ggtitle("Kodik Sampon Escaprmtne")
+  theme_bw()
+  #theme_minimal()
+  my_theme
+  
+
+```
+
+# Plot timeseries of escapement by species for all regions
+
+```{r}
+ggplot(annual_esc, aes(x = year, y = escapement, color = Species)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~SASAP.Region, scales = "free_y") +
+  my_theme
+
+ggsave("figures/region_escapement.png")
+ # ggsave("region_escapement.png", plot = p) to pick a specific plot i think
+```
