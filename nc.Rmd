@@ -77,7 +77,7 @@ ggplot(salinity_data_long, mapping = aes(x = time, y = depth, fill = salinity)) 
 
 
 ```{r}
-ggplot(salinity_data_long, mapping = aes(x = salinity,
+ggplot(salinity_data_long, mapping = aes(x = temperature,
                                         y = depth,
                                         color = time,
                                         group = time))+
