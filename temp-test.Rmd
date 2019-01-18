@@ -11,4 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 source("fahr_celsius.R")
 ```
 
+#share function withi a project
 
+#build own package to use across project of functions create package to use locally
+
+library(devtools)
+library(usethis)
+# install.packages("roxygen2")
+library(roxygen2)
